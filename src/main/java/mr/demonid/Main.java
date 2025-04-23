@@ -2,6 +2,7 @@ package mr.demonid;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        FullscreenPixelApp app = new FullscreenPixelApp(50);
+        new Thread(app).start();
     }
 }
