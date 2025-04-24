@@ -2,11 +2,9 @@ package mr.demonid.jukebox;
 
 
 import mr.demonid.graphics.ScreenBuffer;
-import mr.demonid.graphics.VGAPalette;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -88,15 +86,18 @@ public class JukeBox {
     private int nGenFunc;           // номер текущей функции генерации звезд
 
     private byte baseColor;        // цвет новоиспеченных звезд
-    private final VGAPalette palette;
 
     private final List<Star> stars = new ArrayList<>(MAX_STARS);
     //    private final Star[] stars = new Star[MAX_STARS];
 
 
     public JukeBox() {
-        palette = new VGAPalette(gamePalette);
         starInitialize();
+    }
+
+
+    public byte[] getGamePalette() {
+        return gamePalette;
     }
 
     private void starInitialize() {
@@ -141,7 +142,7 @@ public class JukeBox {
      */
     private void starInitStars() {
         for (int i = 0; i < MAX_STARS; i++) {
-            stars.add(new Star(rand.nextInt(64000) - 32000, rand.nextInt(40000) - 20000, i + 1, palette));
+            stars.add(new Star(rand.nextInt(64000) - 32000, rand.nextInt(40000) - 20000, i + 1));
         }
     }
 

@@ -11,16 +11,14 @@ public class Star {
     private int screenX;
     private int screenY;
     private int color;
-    private VGAPalette palette;
 
-    public Star(int x, int y, int z, VGAPalette palette) {
+    public Star(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.color = 0;
         screenX = 0;
         screenY = 0;
-        this.palette = palette;
     }
 
     public boolean update(int width, int height, int warpSpeed) {
@@ -32,21 +30,18 @@ public class Star {
     }
 
     public void render(ScreenBuffer buffer, int baseColor) {
-        int[] pixels = buffer.pixels();
-        int width = buffer.getWidth();
         int col = baseColor + color;
+        buffer.setPixel(screenX, screenY, col);
 
-        pixels[screenY * width + screenX] = palette.getColor(col);
+        buffer.setPixel(screenX+1, screenY, col+72);
+        buffer.setPixel(screenX-1, screenY, col+72);
+        buffer.setPixel(screenX, screenY+1, col+72);
+        buffer.setPixel(screenX, screenY-1, col+72);
 
-        pixels[screenY * width + screenX - 1] = palette.getColor(col + 72);
-        pixels[screenY * width + screenX + 1] = palette.getColor(col + 72);
-        pixels[(screenY-1) * width + screenX] = palette.getColor(col + 72);
-        pixels[(screenY+1) * width + screenX] = palette.getColor(col + 72);
-
-        pixels[screenY * width + screenX - 2] = palette.getColor(col + 144);
-        pixels[screenY * width + screenX + 2] = palette.getColor(col + 144);
-        pixels[(screenY-2) * width + screenX] = palette.getColor(col + 144);
-        pixels[(screenY+2) * width + screenX] = palette.getColor(col + 144);
+        buffer.setPixel(screenX+2, screenY, col+144);
+        buffer.setPixel(screenX-2, screenY, col+144);
+        buffer.setPixel(screenX, screenY+2, col+144);
+        buffer.setPixel(screenX, screenY-2, col+144);
     }
 
 
@@ -74,14 +69,6 @@ public class Star {
         this.z = z;
     }
 
-
-    public VGAPalette getPalette() {
-        return palette;
-    }
-
-    public void setPalette(VGAPalette palette) {
-        this.palette = palette;
-    }
 
     @Override
     public String toString() {

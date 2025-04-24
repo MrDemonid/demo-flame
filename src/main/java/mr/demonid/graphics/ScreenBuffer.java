@@ -1,79 +1,21 @@
 package mr.demonid.graphics;
 
 import java.awt.*;
-import java.awt.image.*;
-import java.util.Arrays;
+import java.awt.image.BufferedImage;
 
+public interface ScreenBuffer {
+    int getWidth();
+    int getHeight();
 
-/**
- * Буфер экрана в памяти. Для порта старого DOS-кода.
- */
-public class ScreenBuffer {
-    private final int width;
-    private final int height;
+    BufferedImage getImage();
 
-    private final BufferedImage image;
-    private final int[] pixels;
+    void clear();
+    void setPixel(int x, int y, int color);
+    int getPixel(int x, int y);
 
+    void drawText(String text, int x, int y, int color);
+    void setFont(Font font);
 
-    public ScreenBuffer(int width, int height) {
-        this.width = width;
-        this.height = height;
-
-        pixels = new int[width * height];
-        DataBufferInt dataBuffer = new DataBufferInt(pixels, pixels.length);
-        WritableRaster raster = Raster.createPackedRaster(dataBuffer, width, height, width,
-                new int[] { 0xFF0000, 0x00FF00, 0x0000FF }, null);
-        ColorModel colorModel = new DirectColorModel(24, 0xFF0000, 0x00FF00, 0x0000FF);
-        image = new BufferedImage(colorModel, raster, false, null);
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public int[] pixels() {
-        return pixels;
-    }
-
-    public BufferedImage getImage() {
-        return image;
-    }
-
-    public void clear() {
-        Arrays.fill(pixels, 0);
-    }
-
-    public void setPixel(int x, int y, int rgb) {
-        if (x >= 0 && y >= 0 && x < width && y < height) {
-            pixels[y * width + x] = rgb;
-        }
-    }
-
-
-    /**
-     * Масштабированный вывод на экран без сохранения пропорций
-     * */
-    public void draw(Graphics2D g, int screenWidth, int screenHeight) {
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g.drawImage(image, 0, 0, screenWidth, screenHeight, null);
-    }
-
-    /** Масштабированный вывод с сохранением пропорций и центрированием */
-    public void drawCentered(Graphics2D g, int screenWidth, int screenHeight) {
-        double scaleX = screenWidth / (double) width;
-        double scaleY = screenHeight / (double) height;
-        double scale = Math.min(scaleX, scaleY); // сохранить пропорции
-
-        int drawWidth = (int)(width * scale);
-        int drawHeight = (int)(height * scale);
-        int offsetX = (screenWidth - drawWidth) / 2;
-        int offsetY = (screenHeight - drawHeight) / 2;
-
-        g.drawImage(image, offsetX, offsetY, drawWidth, drawHeight, null);
-    }
+    void render(Graphics2D g, int screenWidth, int screenHeight);
+    void render(Graphics2D g, int screenWidth, int screenHeight, Object hintValue);
 }
