@@ -24,6 +24,9 @@ public class FullscreenPixelApp extends Canvas implements Runnable, KeyListener 
     private ScreenshotSaver saver = new ScreenshotSaver("screenshots", "png", "screen", 4);
     private boolean isScreenShoot;
 
+    JukeBox box;
+
+
     public FullscreenPixelApp(long fps) {
         frameTime = 1000 / fps;
 
@@ -59,7 +62,7 @@ public class FullscreenPixelApp extends Canvas implements Runnable, KeyListener 
 
     @Override
     public void run() {
-        JukeBox box = new JukeBox();
+        box = new JukeBox();
 
         BufferStrategy bs = getBufferStrategy();
         int frame = 0;
@@ -113,9 +116,10 @@ public class FullscreenPixelApp extends Canvas implements Runnable, KeyListener 
     @Override public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             running = false;
-        }
-        if (e.getKeyCode() == KeyEvent.VK_F12) {
+        } else  if (e.getKeyCode() == KeyEvent.VK_F12) {
             isScreenShoot = true;
+        } else {
+            box.keyPressed(e);
         }
     }
 

@@ -4,9 +4,13 @@ package mr.demonid.jukebox;
 import mr.demonid.graphics.ScreenBuffer;
 import mr.demonid.graphics.VGAPalette;
 
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
-import static java.lang.Math.random;
 
+import static java.lang.Math.random;
 
 
 public class JukeBox {
@@ -65,33 +69,29 @@ public class JukeBox {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 
-
-
     Random rand = new Random(System.currentTimeMillis());
 
 
-    private float Angle;
-    private float AngleIncrement;   // приращение угла на каждом шаге
-    private float AngleVelocity;    // приращение инкремента
+    private double Angle;
+    private double AngleIncrement;   // приращение угла на каждом шаге
+    private double AngleVelocity;    // приращение инкремента
 
-    private int   intAngle;         //
-    private int   incrIntAngle;
+    private int warpSpeed;        // скорость приближения звезд
+    private int warpVelocity;     // приращение скорости приближения
 
-    private int   warpSpeed;        // скорость приближения звезд
-    private int   warpVelocity;     // приращение скорости приближения
-
-    private int   changeTicks;      // отсчитанное время до смены функции генерации звезд
-    private int   changeTime;       // время до смены функции генерации звезд
+    private int changeTicks;      // отсчитанное время до смены функции генерации звезд
+    private int changeTime;       // время до смены функции генерации звезд
 
     private boolean isChangeFunc;   // флаг разрешения смены функции генерации звезд
-                                    //     0 - смена функции запрещена
-                                    //     1 - разрешена
+    //     0 - смена функции запрещена
+    //     1 - разрешена
     private int nGenFunc;           // номер текущей функции генерации звезд
 
-    private byte  baseColor;        // цвет новоиспеченных звезд
+    private byte baseColor;        // цвет новоиспеченных звезд
     private final VGAPalette palette;
 
-    private final Star[] stars = new Star[MAX_STARS];;
+    private final List<Star> stars = new ArrayList<>(MAX_STARS);
+    //    private final Star[] stars = new Star[MAX_STARS];
 
 
     public JukeBox() {
@@ -100,7 +100,7 @@ public class JukeBox {
     }
 
     private void starInitialize() {
-        isChangeFunc = false;  // разрешаем смену функций генерации звезд
+        isChangeFunc = true;        // разрешаем смену функций генерации звезд
         starsReset();
         starInitStars();
         starSetFunc(2);
@@ -110,8 +110,7 @@ public class JukeBox {
         changeTicks = 0;
         changeTime = rand.nextInt(1000);
 
-        if (func <= 0)
-        {
+        if (func <= 0) {
             //nGenFunc = random(15);
             nGenFunc = rand.nextInt(6);     // 0..5
         } else {
@@ -129,8 +128,6 @@ public class JukeBox {
         Сброс настроек генератора звезд
      */
     private void starsReset() {
-        intAngle = 1;
-        incrIntAngle = 1;
         Angle = 0.0f;
         AngleIncrement = 0.1f;
         AngleVelocity = 0.0001f;
@@ -144,26 +141,23 @@ public class JukeBox {
      */
     private void starInitStars() {
         for (int i = 0; i < MAX_STARS; i++) {
-            stars[i] = new Star(rand.nextInt(64000) - 32000, rand.nextInt(40000) - 20000, i+1, palette);
+            stars.add(new Star(rand.nextInt(64000) - 32000, rand.nextInt(40000) - 20000, i + 1, palette));
         }
     }
 
     /*
         Перерождение ушедшей с поля зрения звезды - просто даем новые координаты.
     */
-    void genNewCoord(Star star)
-    {
+    void genNewCoord(Star star) {
         double newX;
         double newY;
 
-        if (nGenFunc == 0)
-        {
+        if (nGenFunc == 0) {
             newX = rand.nextInt(64000) - 32000;
             newY = rand.nextInt(40000) - 20000;
         } else {
             Angle += AngleIncrement;
-            switch (nGenFunc)
-            {
+            switch (nGenFunc) {
                 case 1:
                     newX = Math.cos(Angle / 30.0f) * 20000.0f;
                     newY = rand.nextInt(40000) - 20000;
@@ -173,18 +167,18 @@ public class JukeBox {
                     newY = Math.cos(Angle) * 20000.0f;
                     break;
                 case 3:
-                    newX = (Math.sin(Angle * 15.0f) * 100.0f) * ((int)(Angle / 6.0f) % 200);
-                    newY = (Math.cos(Angle * 15.0f) * 100.0f) * ((int)(Angle / 6.0f) % 200);
+                    newX = (Math.sin(Angle * 15.0f) * 100.0f) * ((int) (Angle / 6.0f) % 200);
+                    newY = (Math.cos(Angle * 15.0f) * 100.0f) * ((int) (Angle / 6.0f) % 200);
                     break;
 
                 case 4:
                     newX = Math.cos(Angle / 60.0f) * 20000.0f;
-                    newY = (Math.sin(Angle) * (long)(Math.cos(Angle / 200.0f) * 300.0f)) * 100.0f;
+                    newY = (Math.sin(Angle) * (long) (Math.cos(Angle / 200.0f) * 300.0f)) * 100.0f;
                     break;
 
                 case 5:
                     newX = Math.cos(Angle / 2.0f) * 20000.0f;
-                    newY = (long)(Math.sin(Angle / 200.0f) * 300.0f) * Math.cos(Angle) * 100.0f;
+                    newY = (long) (Math.sin(Angle / 200.0f) * 300.0f) * Math.cos(Angle) * 100.0f;
                     break;
 
                 default:
@@ -201,8 +195,6 @@ public class JukeBox {
      * Перерисовка звезд
      */
     public void render(ScreenBuffer buffer) {
-        int col;
-
         int width = buffer.getWidth();
         int height = buffer.getHeight();
 
@@ -210,30 +202,87 @@ public class JukeBox {
 
         buffer.clear();
 
-        for (int i = 0; i < MAX_STARS; i++)
-        {
-            Star star = stars[i];
+        // Отрисовываем с сортировкой по глубине
+        stars.stream().sorted((e, k) -> k.getZ() - e.getZ()).forEach(star -> {
             if (!star.update(width, height, warpSpeed)) {
                 genNewCoord(star);
             } else {
                 star.render(buffer, baseColor);
             }
-        }
+        });
+
         // не пора ли менять функцию генератора звезд?
-        if (isChangeFunc)
-        {
+        if (isChangeFunc) {
             changeTicks++;
             if (changeTicks > changeTime)
                 starSetFunc(0);
         }
         //
-        if (rand.nextInt(1000) == 1)
-        {
+        if (rand.nextInt(1000) == 1) {
             AngleVelocity = (float) (random() * 0.001f - 0.0005f);
         }
         AngleIncrement += AngleVelocity;
     }
 
+
+    public void keyPressed(KeyEvent e) {
+        char ch = e.getKeyChar();
+        switch (ch) {
+            case '+':
+            case '=':
+                warpSpeed++;
+                warpVelocity = 0;
+                break;
+            case '-':
+            case '_':
+                warpSpeed--;
+                warpVelocity = 0;
+                break;
+            case '0':
+                starSetFunc(10);
+                break;
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                starSetFunc(ch - '0');
+                break;
+            case '!':
+            case '@':
+            case '#':
+            case '$':
+                starSetFunc(ch - '!' + 11);
+                break;
+            case 'c':
+            case 'C':
+                starsReset();
+                break;
+            case 's':
+            case 'S':
+                AngleVelocity = random() * 0.01f - 0.005f;
+                break;
+            case '[':
+                baseColor--;
+                break;
+            case ']':
+                baseColor++;
+                break;
+            case '{':
+                baseColor -= 72;
+                break;
+            case '}':
+                baseColor += 72;
+                break;
+            case '`':
+                isChangeFunc = !isChangeFunc;
+                break;
+        }
+    }
 
 
 }
