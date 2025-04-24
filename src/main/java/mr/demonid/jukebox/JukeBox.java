@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static java.lang.Math.random;
+import static java.lang.Math.*;
 
 
 public class JukeBox {
@@ -74,6 +74,9 @@ public class JukeBox {
     private double AngleIncrement;   // приращение угла на каждом шаге
     private double AngleVelocity;    // приращение инкремента
 
+    private int Angle2;
+    private int Angle2Increment;
+
     private int warpSpeed;        // скорость приближения звезд
     private int warpVelocity;     // приращение скорости приближения
 
@@ -104,7 +107,7 @@ public class JukeBox {
         isChangeFunc = true;        // разрешаем смену функций генерации звезд
         starsReset();
         starInitStars();
-        starSetFunc(2);
+        starSetFunc(0);
     }
 
     private void starSetFunc(int func) {
@@ -112,12 +115,9 @@ public class JukeBox {
         changeTime = rand.nextInt(1000);
 
         if (func <= 0) {
-            //nGenFunc = random(15);
-            nGenFunc = rand.nextInt(6);     // 0..5
+            nGenFunc = rand.nextInt(10);     // 0..9
         } else {
-            if (func > 14)
-                func = 14;
-            nGenFunc = func;
+            nGenFunc = Math.min(func, 9);
         }
         if (nGenFunc == 1)
             AngleIncrement = 0.1f;
@@ -132,6 +132,8 @@ public class JukeBox {
         Angle = 0.0f;
         AngleIncrement = 0.1f;
         AngleVelocity = 0.0001f;
+        Angle2 = 0;
+        Angle2Increment = 1;
         baseColor = 32;
         warpSpeed = 2;
         warpVelocity = 0;
@@ -160,26 +162,49 @@ public class JukeBox {
             Angle += AngleIncrement;
             switch (nGenFunc) {
                 case 1:
-                    newX = Math.cos(Angle / 30.0f) * 20000.0f;
-                    newY = rand.nextInt(40000) - 20000;
+                    newX = cos(Angle / 30.0) * 20000.0;
+                    newY = rand.nextInt(40000) - 20000.0;
                     break;
                 case 2:
-                    newX = Math.sin(Angle) * 20000.0f;
-                    newY = Math.cos(Angle) * 20000.0f;
+                    newX = sin(Angle) * 20000.0;
+                    newY = cos(Angle) * 20000.0;
                     break;
                 case 3:
-                    newX = (Math.sin(Angle * 15.0f) * 100.0f) * ((int) (Angle / 6.0f) % 200);
-                    newY = (Math.cos(Angle * 15.0f) * 100.0f) * ((int) (Angle / 6.0f) % 200);
+                    newX = (sin(Angle * 15.0) * 100.0) * (((int) (Angle / 6.0)) % 200);
+                    newY = (cos(Angle * 15.0) * 100.0) * (((int) (Angle / 6.0)) % 200);
                     break;
-
                 case 4:
-                    newX = Math.cos(Angle / 60.0f) * 20000.0f;
-                    newY = (Math.sin(Angle) * (long) (Math.cos(Angle / 200.0f) * 300.0f)) * 100.0f;
+                    newX = cos(Angle / 60.0) * 20000.0;
+                    newY = (sin(Angle) * ((int) (cos(Angle / 200.0) * 300.0)) * 100.0);
                     break;
-
                 case 5:
-                    newX = Math.cos(Angle / 2.0f) * 20000.0f;
-                    newY = (long) (Math.sin(Angle / 200.0f) * 300.0f) * Math.cos(Angle) * 100.0f;
+                    newX = cos(Angle / 2.0) * 20000.0;
+                    newY = ((int) (cos(Angle / 200.0) * 300.0)) * sin(Angle) * 100.0;
+                    break;
+                case 6:
+                    newX = cos(Angle) * 40000.0;
+                    newY = sin(Angle) * 20000.0;
+                    break;
+                case 7:
+                    newX = rand.nextInt(65535);
+                    if (rand.nextInt(2) == 0) {
+                        newY = (int) (sin(Angle / 80.0) * 10000.0) + 15000;
+                    } else {
+                        newY = 50000 - (int) (sin(Angle / 80.0) * 13000.0);
+                    }
+                    System.out.println("-x = " + newX + ", y = " + newY);
+                    break;
+                case 8:
+                    newX = cos(Angle / 2.0) * 40000.0;
+                    newY = sin(Angle) * 20000.0;
+                    break;
+                case 9:
+                    Angle2 += Angle2Increment;
+                    if (Angle2 >= 0xFFFF || Angle2 == 0) {
+                        Angle2Increment = -Angle2Increment;
+                    }
+                    newX = sin(cos((double) Angle2 / 10.0) + (Angle / 500.0)) + 32000.0;
+                    newY = cos(sin((double) Angle2 / 10.0) + (Angle / 500.0)) + 30000.0;
                     break;
 
                 default:
