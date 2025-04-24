@@ -23,26 +23,30 @@ public class Star {
         this.palette = palette;
     }
 
-    public void update() {
-
+    public boolean update(int width, int height, int warpSpeed) {
+        screenX = x / z + (width / 2);
+        screenY = y / z + (height / 2);
+        z -= warpSpeed;
+        color = (z / 16) & 0x1F;
+        return z > 0 && screenY > 1 && screenY <= (height - 3) && screenX > 1 && screenX <= (width - 3);
     }
 
-    public void render(ScreenBuffer buffer) {
+    public void render(ScreenBuffer buffer, int baseColor) {
         int[] pixels = buffer.pixels();
         int width = buffer.getWidth();
-        int height = buffer.getHeight();
+        int col = baseColor + color;
 
-        pixels[screenY * width + screenX] = palette.getColor(color);
+        pixels[screenY * width + screenX] = palette.getColor(col);
 
-        pixels[screenY * width + screenX - 1] = palette.getColor(color + 72);
-        pixels[screenY * width + screenX + 1] = palette.getColor(color + 72);
-        pixels[(screenY-1) * width + screenX] = palette.getColor(color + 72);
-        pixels[(screenY+1) * width + screenX] = palette.getColor(color + 72);
+        pixels[screenY * width + screenX - 1] = palette.getColor(col + 72);
+        pixels[screenY * width + screenX + 1] = palette.getColor(col + 72);
+        pixels[(screenY-1) * width + screenX] = palette.getColor(col + 72);
+        pixels[(screenY+1) * width + screenX] = palette.getColor(col + 72);
 
-        pixels[screenY * width + screenX - 2] = palette.getColor(color + 144);
-        pixels[screenY * width + screenX + 2] = palette.getColor(color + 144);
-        pixels[(screenY-2) * width + screenX] = palette.getColor(color + 144);
-        pixels[(screenY+2) * width + screenX] = palette.getColor(color + 144);
+        pixels[screenY * width + screenX - 2] = palette.getColor(col + 144);
+        pixels[screenY * width + screenX + 2] = palette.getColor(col + 144);
+        pixels[(screenY-2) * width + screenX] = palette.getColor(col + 144);
+        pixels[(screenY+2) * width + screenX] = palette.getColor(col + 144);
     }
 
 
@@ -70,29 +74,6 @@ public class Star {
         this.z = z;
     }
 
-    public int getScreenX() {
-        return screenX;
-    }
-
-    public void setScreenX(int screenX) {
-        this.screenX = screenX;
-    }
-
-    public int getScreenY() {
-        return screenY;
-    }
-
-    public void setScreenY(int screenY) {
-        this.screenY = screenY;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public void setColor(int color) {
-        this.color = color;
-    }
 
     public VGAPalette getPalette() {
         return palette;

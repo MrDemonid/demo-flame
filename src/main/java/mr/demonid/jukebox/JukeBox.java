@@ -70,30 +70,26 @@ public class JukeBox {
     Random rand = new Random(System.currentTimeMillis());
 
 
-    float Angle;
-    float AngleIncrement;   // приращение угла на каждом шаге
-    float AngleVelocity;    // приращение инкремента
+    private float Angle;
+    private float AngleIncrement;   // приращение угла на каждом шаге
+    private float AngleVelocity;    // приращение инкремента
 
-    int   intAngle;         //
-    int   incrIntAngle;
+    private int   intAngle;         //
+    private int   incrIntAngle;
 
-    int   warpSpeed;        // скорость приближения звезд
-    int   warpVelocity;     // приращение скорости приближения
+    private int   warpSpeed;        // скорость приближения звезд
+    private int   warpVelocity;     // приращение скорости приближения
 
-    int   changeTicks;      // отсчитанное время до смены функции генерации звезд
-    int   changeTime;       // время до смены функции генерации звезд
+    private int   changeTicks;      // отсчитанное время до смены функции генерации звезд
+    private int   changeTime;       // время до смены функции генерации звезд
 
-    boolean isChangeFunc;   // флаг разрешения смены функции генерации звезд
-                            //     0 - смена функции запрещена
-                            //     1 - разрешена
-    int nGenFunc;           // номер текущей функции генерации звезд
+    private boolean isChangeFunc;   // флаг разрешения смены функции генерации звезд
+                                    //     0 - смена функции запрещена
+                                    //     1 - разрешена
+    private int nGenFunc;           // номер текущей функции генерации звезд
 
-    char  baseColor;        // цвет новоиспеченных звезд
-    char  colorMethod;      // определяет методику назначения цвета звездам
-                            //     0: color = baseColor + ((Z / 16) & 0x1F)
-                            //     1: color = Z / 2
-    private VGAPalette palette;
-
+    private byte  baseColor;        // цвет новоиспеченных звезд
+    private final VGAPalette palette;
 
     private final Star[] stars = new Star[MAX_STARS];;
 
@@ -105,8 +101,8 @@ public class JukeBox {
 
     private void starInitialize() {
         isChangeFunc = false;  // разрешаем смену функций генерации звезд
-        starInitStars();
         starsReset();
+        starInitStars();
         starSetFunc(2);
     }
 
@@ -155,7 +151,7 @@ public class JukeBox {
     /*
         Перерождение ушедшей с поля зрения звезды - просто даем новые координаты.
     */
-    void genNewCoord(int index)
+    void genNewCoord(Star star)
     {
         double newX;
         double newY;
@@ -196,9 +192,9 @@ public class JukeBox {
                     newY = rand.nextInt(40000) - 20000;
             } // switch
         }
-        stars[index].setZ(MAX_DISTANCE);
-        stars[index].setX((int) newX);
-        stars[index].setY((int) newY);
+        star.setZ(MAX_DISTANCE);
+        star.setX((int) newX);
+        star.setY((int) newY);
     }
 
     /**
@@ -210,7 +206,6 @@ public class JukeBox {
         int width = buffer.getWidth();
         int height = buffer.getHeight();
 
-        colorMethod = 0;
         warpSpeed += warpVelocity;
 
         buffer.clear();
@@ -218,32 +213,10 @@ public class JukeBox {
         for (int i = 0; i < MAX_STARS; i++)
         {
             Star star = stars[i];
-
-            // вычисляем новые координаты
-            int nz = star.getZ();
-            int nx = star.getX() / nz + (width / 2);     // si
-            int ny = star.getY() / nz + (height / 2);
-            nz -= warpSpeed;
-            if (nz <= 1 || ny <= 1 || ny > (height-3) || nx <= 0 || nx > (width-3))
-            {
-                // звезда вышла за пределы экрана, создаем новую
-                genNewCoord(i);
-
+            if (!star.update(width, height, warpSpeed)) {
+                genNewCoord(star);
             } else {
-                // перемещаем звезду на новое место
-                star.setScreenX(nx);
-                star.setScreenY(ny);
-                star.setZ(nz);
-                col = baseColor + ((nz / 16) & 0x1F);
-//                if (colorMethod != 1)
-//                {
-//                    col = baseColor + ((nz / 16) & 0x1F);
-//                } else {
-//                    col = nz / 2;
-//                }
-                // отрисовываем на новом месте
-                star.setColor(col);
-                star.render(buffer);
+                star.render(buffer, baseColor);
             }
         }
         // не пора ли менять функцию генератора звезд?
