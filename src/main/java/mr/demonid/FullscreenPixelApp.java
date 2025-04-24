@@ -1,6 +1,7 @@
 package mr.demonid;
 
 import mr.demonid.graphics.ScreenBuffer;
+import mr.demonid.graphics.screenshoot.ScreenshotSaver;
 import mr.demonid.jukebox.JukeBox;
 
 import javax.swing.*;
@@ -8,6 +9,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
+import java.io.IOException;
 
 public class FullscreenPixelApp extends Canvas implements Runnable, KeyListener {
 
@@ -18,6 +20,9 @@ public class FullscreenPixelApp extends Canvas implements Runnable, KeyListener 
     private final int height;
 
     private final ScreenBuffer screenBuffer;
+
+    private ScreenshotSaver saver = new ScreenshotSaver("screenshots", "png", "screen", 4);
+    private boolean isScreenShoot;
 
     public FullscreenPixelApp(long fps) {
         frameTime = 1000 / fps;
@@ -58,9 +63,11 @@ public class FullscreenPixelApp extends Canvas implements Runnable, KeyListener 
 
         BufferStrategy bs = getBufferStrategy();
         int frame = 0;
+        isScreenShoot = false;
 
         while (running) {
             long startTime = System.currentTimeMillis();
+
 
             box.render(screenBuffer);
             Graphics2D g = (Graphics2D) bs.getDrawGraphics();
@@ -68,6 +75,10 @@ public class FullscreenPixelApp extends Canvas implements Runnable, KeyListener 
             g.dispose();
             bs.show();
 
+            if (isScreenShoot) {
+                saver.save(screenBuffer);
+                isScreenShoot = false;
+            }
 
 //            int[] pixels = screenBuffer.pixels();
 //            for (int y = 0; y < screenBuffer.getHeight(); y++) {
@@ -102,6 +113,9 @@ public class FullscreenPixelApp extends Canvas implements Runnable, KeyListener 
     @Override public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             running = false;
+        }
+        if (e.getKeyCode() == KeyEvent.VK_F12) {
+            isScreenShoot = true;
         }
     }
 

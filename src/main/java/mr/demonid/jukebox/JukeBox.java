@@ -2,6 +2,7 @@ package mr.demonid.jukebox;
 
 
 import mr.demonid.graphics.ScreenBuffer;
+import mr.demonid.graphics.VGAPalette;
 
 import java.util.Random;
 import static java.lang.Math.random;
@@ -13,7 +14,7 @@ public class JukeBox {
     private final static int MAX_STARS = 1000;
     private final static int MAX_DISTANCE = 500;
 
-    int[] gamePalette = {
+    byte[] gamePalette = {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x2A, 0x00, 0x2A, 0x00, 0x00, 0x2A, 0x2A, 0x2A, 0x00, 0x00, 0x2A,
             0x00, 0x2A, 0x2A, 0x15, 0x00, 0x2A, 0x2A, 0x2A, 0x15, 0x15, 0x15, 0x15, 0x15, 0x3F, 0x15, 0x3F,
             0x15, 0x15, 0x3F, 0x3F, 0x3F, 0x15, 0x15, 0x3F, 0x15, 0x3F, 0x3F, 0x3F, 0x15, 0x3F, 0x3F, 0x3F,
@@ -91,13 +92,14 @@ public class JukeBox {
     char  colorMethod;      // определяет методику назначения цвета звездам
                             //     0: color = baseColor + ((Z / 16) & 0x1F)
                             //     1: color = Z / 2
+    private VGAPalette palette;
 
-    private int[] colors = new int[256];    // таблица цветов
 
     private final Star[] stars = new Star[MAX_STARS];;
 
 
     public JukeBox() {
+        palette = new VGAPalette(gamePalette);
         starInitialize();
     }
 
@@ -106,7 +108,6 @@ public class JukeBox {
         starInitStars();
         starsReset();
         starSetFunc(2);
-        genColors();
     }
 
     private void starSetFunc(int func) {
@@ -147,20 +148,9 @@ public class JukeBox {
      */
     private void starInitStars() {
         for (int i = 0; i < MAX_STARS; i++) {
-            stars[i] = new Star(rand.nextInt(64000) - 32000, rand.nextInt(40000) - 20000, i+1);
+            stars[i] = new Star(rand.nextInt(64000) - 32000, rand.nextInt(40000) - 20000, i+1, palette);
         }
     }
-
-    private void genColors() {
-        for (int i = 0; i < 256; i++) {
-            int r = gamePalette[i*3] << 2;
-            int g = gamePalette[i*3+1] << 2;
-            int b = gamePalette[i*3+2] << 2;
-
-            colors[i] = 0xFF000000 | (r << 16) | (g << 8) | b;
-        }
-    }
-
 
     /*
         Перерождение ушедшей с поля зрения звезды - просто даем новые координаты.
@@ -206,6 +196,7 @@ public class JukeBox {
                     newY = rand.nextInt(40000) - 20000;
             } // switch
         }
+        stars[index].setZ(MAX_DISTANCE);
         stars[index].setX((int) newX);
         stars[index].setY((int) newY);
     }
@@ -214,7 +205,6 @@ public class JukeBox {
      * Перерисовка звезд
      */
     public void render(ScreenBuffer buffer) {
-        int nx, ny, nz;
         int col;
 
         int width = buffer.getWidth();
@@ -230,14 +220,13 @@ public class JukeBox {
             Star star = stars[i];
 
             // вычисляем новые координаты
-            nz = star.getZ();
-            nx = star.getX() / nz + (width / 2);     // si
-            ny = star.getY() / nz + (height / 2);
+            int nz = star.getZ();
+            int nx = star.getX() / nz + (width / 2);     // si
+            int ny = star.getY() / nz + (height / 2);
             nz -= warpSpeed;
             if (nz <= 1 || ny <= 1 || ny > (height-3) || nx <= 0 || nx > (width-3))
             {
                 // звезда вышла за пределы экрана, создаем новую
-                star.setZ(MAX_DISTANCE);
                 genNewCoord(i);
 
             } else {
@@ -245,17 +234,17 @@ public class JukeBox {
                 star.setScreenX(nx);
                 star.setScreenY(ny);
                 star.setZ(nz);
-                if (colorMethod != 1)
-                {
-                    col = baseColor + ((nz / 16) & 0x1F);
-                } else {
-                    col = nz / 2;
-                }
+                col = baseColor + ((nz / 16) & 0x1F);
+//                if (colorMethod != 1)
+//                {
+//                    col = baseColor + ((nz / 16) & 0x1F);
+//                } else {
+//                    col = nz / 2;
+//                }
                 // отрисовываем на новом месте
-                star.setColor(colors[col & 0xFF]);
+                star.setColor(col);
                 star.render(buffer);
             }
-
         }
         // не пора ли менять функцию генератора звезд?
         if (isChangeFunc)

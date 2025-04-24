@@ -40,6 +40,10 @@ public class ScreenBuffer {
         return pixels;
     }
 
+    public BufferedImage getImage() {
+        return image;
+    }
+
     public void clear() {
         Arrays.fill(pixels, 0);
     }
