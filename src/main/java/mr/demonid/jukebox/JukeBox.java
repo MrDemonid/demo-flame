@@ -130,10 +130,9 @@ public class JukeBox {
         changeTime = rand.nextInt(1000);
 
         if (func <= 0) {
-            nGenFunc = rand.nextInt(15);     // 0..10
-        } else {
-            nGenFunc = min(func, 14);
+            func = rand.nextInt(15);     // 0..14
         }
+        nGenFunc = min(func, 14);
         if (nGenFunc == 1)
             AngleIncrement = 0.1f;
         if (AngleIncrement > 2.2f)
