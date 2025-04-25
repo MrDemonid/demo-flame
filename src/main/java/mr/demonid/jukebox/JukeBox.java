@@ -104,26 +104,11 @@ public class JukeBox {
     }
 
     private void starInitialize() {
-        isChangeFunc = false;        // разрешаем смену функций генерации звезд
-//        isChangeFunc = true;        // разрешаем смену функций генерации звезд
         starsReset();
+//        isChangeFunc = false;        // разрешаем смену функций генерации звезд
+        isChangeFunc = true;        // разрешаем смену функций генерации звезд
         starInitStars();
         starSetFunc(0);
-    }
-
-    private void starSetFunc(int func) {
-        changeTicks = 0;
-        changeTime = rand.nextInt(1000);
-
-        if (func <= 0) {
-            nGenFunc = rand.nextInt(13);     // 0..10
-        } else {
-            nGenFunc = min(func, 12);
-        }
-        if (nGenFunc == 1)
-            AngleIncrement = 0.1f;
-        if (AngleIncrement > 2.2f)
-            AngleIncrement = 0.1f;
     }
 
     /*
@@ -131,13 +116,28 @@ public class JukeBox {
      */
     private void starsReset() {
         Angle = 0.0f;
-        AngleIncrement = 0.1f;
-        AngleVelocity = 0.0001f;
+        AngleIncrement = 0.1;
+        AngleVelocity = 0.0001;
         Angle2 = 0;
         Angle2Increment = 1;
         baseColor = 32;
         warpSpeed = 2;
         warpVelocity = 0;
+    }
+
+    private void starSetFunc(int func) {
+        changeTicks = 0;
+        changeTime = rand.nextInt(1000);
+
+        if (func <= 0) {
+            nGenFunc = rand.nextInt(15);     // 0..10
+        } else {
+            nGenFunc = min(func, 14);
+        }
+        if (nGenFunc == 1)
+            AngleIncrement = 0.1f;
+        if (AngleIncrement > 2.2f)
+            AngleIncrement = 0.1f;
     }
 
     /*
@@ -222,9 +222,22 @@ public class JukeBox {
                     if (Angle != 0.0) {
                         incrAngle2();
                         newX = (short) (sin(cos(Angle2 / 2.0) / (sqrt(abs(Angle)) / 10.0 + 1.0) + (Angle2 / 100.0)) * 32000.0);
-                        newY = (short) (cos(sin(Angle2 / 2.0) / (sqrt(Angle) / 10.0 + 1.0) + (Angle2 / 100.0)) * 30000.0);
+                        newY = (short) (cos(sin(Angle2 / 2.0) / (sqrt(abs(Angle)) / 10.0 + 1.0) + (Angle2 / 100.0)) * 30000.0);
                     }
                     break;
+                case 13:
+                    if (Angle != 0.0) {
+                        incrAngle2();
+                        newX = (short) (sin(cos(Angle2 / 10.0) / 2.0 + (Angle / 20.0)) * 32000.0);
+                        newY = (short) (cos(cos(Angle2 / 11.0) / 2.0 + (Angle / 20.0)) * 30000.0);
+                    }
+                    break;
+                case 14:
+                    Angle2 = (Angle2 + Angle2Increment) & 0xFFFF;
+                    newX = (short) ((cos(Angle) + sin(Angle2 / 1000.0) * 3.0) * 12000.0);
+                    newY = (short) ((int) (sin(Angle) * 10000.0) + Angle2);
+                    break;
+
                 default:
                     newX = (short) (rand.nextInt(64000) - 32000);
                     newY = (short) (rand.nextInt(40000) - 20000);
@@ -241,6 +254,7 @@ public class JukeBox {
             Angle2Increment = -Angle2Increment;
         }
     }
+
     /**
      * Перерисовка звезд
      */
