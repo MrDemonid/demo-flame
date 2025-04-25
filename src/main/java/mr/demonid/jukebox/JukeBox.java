@@ -104,7 +104,8 @@ public class JukeBox {
     }
 
     private void starInitialize() {
-        isChangeFunc = true;        // разрешаем смену функций генерации звезд
+        isChangeFunc = false;        // разрешаем смену функций генерации звезд
+//        isChangeFunc = true;        // разрешаем смену функций генерации звезд
         starsReset();
         starInitStars();
         starSetFunc(0);
@@ -115,9 +116,9 @@ public class JukeBox {
         changeTime = rand.nextInt(1000);
 
         if (func <= 0) {
-            nGenFunc = rand.nextInt(10);     // 0..9
+            nGenFunc = rand.nextInt(13);     // 0..10
         } else {
-            nGenFunc = Math.min(func, 9);
+            nGenFunc = min(func, 12);
         }
         if (nGenFunc == 1)
             AngleIncrement = 0.1f;
@@ -152,71 +153,94 @@ public class JukeBox {
         Перерождение ушедшей с поля зрения звезды - просто даем новые координаты.
     */
     void genNewCoord(Star star) {
-        double newX;
-        double newY;
+        short newX = 0;
+        short newY = 0;
+
 
         if (nGenFunc == 0) {
-            newX = rand.nextInt(64000) - 32000;
-            newY = rand.nextInt(40000) - 20000;
+            newX = (short) (rand.nextInt(64000) - 32000);
+            newY = (short) (rand.nextInt(40000) - 20000);
         } else {
             Angle += AngleIncrement;
             switch (nGenFunc) {
                 case 1:
-                    newX = cos(Angle / 30.0) * 20000.0;
-                    newY = rand.nextInt(40000) - 20000.0;
+                    newX = (short) (cos(Angle / 30.0) * 20000.0);
+                    newY = (short) (rand.nextInt(40000) - 20000.0);
                     break;
                 case 2:
-                    newX = sin(Angle) * 20000.0;
-                    newY = cos(Angle) * 20000.0;
+                    newX = (short) (sin(Angle) * 20000.0);
+                    newY = (short) (cos(Angle) * 20000.0);
                     break;
                 case 3:
-                    newX = (sin(Angle * 15.0) * 100.0) * (((int) (Angle / 6.0)) % 200);
-                    newY = (cos(Angle * 15.0) * 100.0) * (((int) (Angle / 6.0)) % 200);
+                    newX = (short) (((int)(sin(Angle * 15.0) * 100.0)) * (((int) (Angle / 6.0)) % 200));
+                    newY = (short) (((int)(cos(Angle * 15.0) * 100.0)) * (((int) (Angle / 6.0)) % 200));
                     break;
                 case 4:
-                    newX = cos(Angle / 60.0) * 20000.0;
-                    newY = (sin(Angle) * ((int) (cos(Angle / 200.0) * 300.0)) * 100.0);
+                    newX = (short) (cos(Angle / 60.0) * 20000.0);
+                    newY = (short) (sin(Angle) * ((int)(cos(Angle / 200.0) * 300.0)) * 100.0);
                     break;
                 case 5:
-                    newX = cos(Angle / 2.0) * 20000.0;
-                    newY = ((int) (cos(Angle / 200.0) * 300.0)) * sin(Angle) * 100.0;
+//                    newX = (short) (cos(Angle / 2.0f) * 20000.0f);
+//                    newY = (short) ((int)(cos(Angle / 200.0f) * 300.0f) * sin(Angle) * 100.0f);
+                    newX = (short) (cos(Angle / 2.0f) * 20000.0f);
+                    newY = (short) ((sin(Angle / 200.0f) * 300.0f) * cos(Angle) * 100.0f);
                     break;
                 case 6:
-                    newX = cos(Angle) * 40000.0;
-                    newY = sin(Angle) * 20000.0;
+                    newX = (short) (cos(Angle) * 40000.0);
+                    newY = (short) (sin(Angle) * 20000.0);
                     break;
                 case 7:
-                    newX = rand.nextInt(65535);
+                    newX = (short) rand.nextInt(65535);
                     if (rand.nextInt(2) == 0) {
-                        newY = (int) (sin(Angle / 80.0) * 10000.0) + 15000;
+                        newY = (short) ((int) (sin(Angle / 80.0) * 10000.0) + 15000);
                     } else {
-                        newY = 50000 - (int) (sin(Angle / 80.0) * 13000.0);
+                        newY = (short) (50000 - (int) (sin(Angle / 80.0) * 13000));
                     }
-                    System.out.println("-x = " + newX + ", y = " + newY);
                     break;
                 case 8:
-                    newX = cos(Angle / 2.0) * 40000.0;
-                    newY = sin(Angle) * 20000.0;
+//                    newX = (short) (cos(Angle / 2.0) * 40000.0);
+//                    newY = (short) (sin(Angle) * 20000.0);
+                    newX = (short) (sin(Angle / 2.0) * 40000.0);
+                    newY = (short) (cos(Angle) * 20000.0);
                     break;
                 case 9:
-                    Angle2 += Angle2Increment;
-                    if (Angle2 >= 0xFFFF || Angle2 == 0) {
-                        Angle2Increment = -Angle2Increment;
-                    }
-                    newX = sin(cos((double) Angle2 / 10.0) + (Angle / 500.0)) + 32000.0;
-                    newY = cos(sin((double) Angle2 / 10.0) + (Angle / 500.0)) + 30000.0;
+                    incrAngle2();
+                    newX = (short) (sin(cos(Angle2 / 10.0) + (Angle / 500.0)) * 32000.0);
+                    newY = (short) (cos(sin(Angle2 / 10.0) + (Angle / 500.0)) * 30000.0);
                     break;
-
+                case 10:
+                    incrAngle2();
+                    newX = (short) (sin(cos(Angle2 / 5.0) + (Angle / 100.0)) * 32000.0);
+                    newY = (short) (cos(sin(Angle2 / 5.0) + (Angle / 100.0)) * 30000.0);
+                    break;
+                case 11:
+                    incrAngle2();
+                    newX = (short) (sin(cos(Angle2 / 1000.0) + (Angle / 2.0)) * 32000.0);
+                    newY = (short) (cos(sin(Angle2 / 1000.0) + (Angle / 2.0)) * 30000.0);
+                    break;
+                case 12:
+                    if (Angle != 0.0) {
+                        incrAngle2();
+                        newX = (short) (sin(cos(Angle2 / 2.0) / (sqrt(abs(Angle)) / 10.0 + 1.0) + (Angle2 / 100.0)) * 32000.0);
+                        newY = (short) (cos(sin(Angle2 / 2.0) / (sqrt(Angle) / 10.0 + 1.0) + (Angle2 / 100.0)) * 30000.0);
+                    }
+                    break;
                 default:
-                    newX = rand.nextInt(64000) - 32000;
-                    newY = rand.nextInt(40000) - 20000;
+                    newX = (short) (rand.nextInt(64000) - 32000);
+                    newY = (short) (rand.nextInt(40000) - 20000);
             } // switch
         }
         star.setZ(MAX_DISTANCE);
-        star.setX((int) newX);
-        star.setY((int) newY);
+        star.setX(newX);
+        star.setY(newY);
     }
 
+    private void incrAngle2() {
+        Angle2 += Angle2Increment;
+        if (Angle2 == 0xFFFF || Angle2 == 0) {
+            Angle2Increment = -Angle2Increment;
+        }
+    }
     /**
      * Перерисовка звезд
      */
